@@ -13,3 +13,8 @@ class SpideroneItem(scrapy.Item):
     # name = scrapy.Field()
     author = scrapy.Field()
     theme = scrapy.Field()
+
+class mysqlDemoItem(scrapy.Item):
+    img = scrapy.Field()
+    title = scrapy.Field()
+    desc = scrapy.Field()
