@@ -18,3 +18,8 @@ class mysqlDemoItem(scrapy.Item):
     img = scrapy.Field()
     title = scrapy.Field()
     desc = scrapy.Field()
+
+class spDemoItem(scrapy.Item):
+    name = scrapy.Field()
+    pnum = scrapy.Field()
+    plist = scrapy.Field()

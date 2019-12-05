@@ -9,6 +9,7 @@ from scrapy import signals
 
 from scrapy.http import HtmlResponse
 from selenium import webdriver
+import time
 
 
 class SpideroneSpiderMiddleware(object):
@@ -132,12 +133,24 @@ class SeleniumMiddleware(object):
         # for i in range(2):
         #     spider.browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
+        time.sleep(3)
+
+
+        #js = 'document.getElementsByClassName("shopee-button-outline--primary-reverse")[0].click();'
+        #spider.browser.execute_script(js); 
+
+        spider.browser.execute_script('setTimeout(window.scrollTo(0, 500), 1000)')
+        spider.browser.execute_script("window.scrollTo(500, 700);")
+        #spider.browser.execute_script("alert('123');")
         spider.browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+        time.sleep(6)
         
+
         res = HtmlResponse(url = spider.browser.current_url, body = spider.browser.page_source, encoding = 'utf8', request = request)
-        print("==========================res")
-        print(spider.browser.page_source)
-        print("==========================res")
+        #print("==========================res")
+        #print(spider.browser.page_source)
+        #print("==========================res")
         return res
 
     def process_response(self, request, response, spider):
