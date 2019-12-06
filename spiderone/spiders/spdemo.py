@@ -7,7 +7,7 @@ from selenium import webdriver
 class SpdemoSpider(scrapy.Spider):
     name = 'spdemo'
     allowed_domains = ['shopee.com.my']
-    start_urls = ['https://shopee.com.my/shop/71665063/search?page=0&sortBy=sales']
+    start_urls = ['https://shopee.com.my/shop/178840654/search?page=0&sortBy=relevancy']
 
     custom_settings = {
         'DOWNLOADER_MIDDLEWARES' : {'spiderone.middlewares.SeleniumMiddleware': 543,}

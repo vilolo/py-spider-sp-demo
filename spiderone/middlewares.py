@@ -136,8 +136,8 @@ class SeleniumMiddleware(object):
         time.sleep(3)
 
 
-        #js = 'document.getElementsByClassName("shopee-button-outline--primary-reverse")[0].click();'
-        #spider.browser.execute_script(js); 
+        js = 'var langBtn = document.getElementsByClassName("shopee-button-outline--primary-reverse"); if(langBtn.length > 0){langBtn[0].click();};'
+        spider.browser.execute_script(js); 
 
         spider.browser.execute_script('setTimeout(window.scrollTo(0, 500), 1000)')
         spider.browser.execute_script("window.scrollTo(500, 700);")

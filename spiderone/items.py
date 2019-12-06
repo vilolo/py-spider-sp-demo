@@ -23,3 +23,29 @@ class spDemoItem(scrapy.Item):
     name = scrapy.Field()
     pnum = scrapy.Field()
     plist = scrapy.Field()
+
+class buckStoreItem(scrapy.Item):
+    crawlid = scrapy.Field()
+    name = scrapy.Field()
+    storeId = scrapy.Field()
+    products = scrapy.Field()
+    joined = scrapy.Field()
+    followers = scrapy.Field()
+    following = scrapy.Field()
+    rating = scrapy.Field()
+
+class buckProductItem(scrapy.Item):
+    crawlid = scrapy.Field()
+    pcode = scrapy.Field()
+    cover = scrapy.Field()
+    discount = scrapy.Field()
+    activity = scrapy.Field()
+    multipleOffer = scrapy.Field()
+    title = scrapy.Field()
+    price = scrapy.Field()
+    likes = scrapy.Field()
+    sales = scrapy.Field()
+    categorys = scrapy.Field()
+    popularRanking = scrapy.Field()
+    url = scrapy.Field()
+
