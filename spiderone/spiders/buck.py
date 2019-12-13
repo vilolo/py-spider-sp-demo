@@ -4,16 +4,26 @@ import spiderone.items
 from selenium import webdriver
 import time
 import sys
+from scrapy.http.response.html import HtmlResponse
+from spiderone.items import buckProductItem
+from time import sleep
 
 
 class BuckSpider(scrapy.Spider):
     name = 'buck'
     allowed_domains = ['shopee.com.my']
     start_urls = []
+    cur_page = 1
 
     custom_settings = {
-        'DOWNLOADER_MIDDLEWARES' : {'spiderone.middlewares.SeleniumMiddleware': 543,},
-        'ITEM_PIPELINES' : {'spiderone.pipelines.BuckPipeline': 300,}
+        'DOWNLOADER_MIDDLEWARES' : {
+            'spiderone.middlewares.SeleniumMiddleware': 543,
+            "scrapy.contrib.downloadermiddleware.redirect.RedirectMiddleware": None,
+            },
+        'ITEM_PIPELINES' : {
+            'spiderone.pipelines.BuckPipeline': 300
+            },
+        'RETRY_ENABLED' : True
     }
 
     def __init__(self, name=None, **kwargs):
@@ -23,15 +33,16 @@ class BuckSpider(scrapy.Spider):
         #chrome_options.add_argument('--no-sandbox') #非沙盘模式
         self.browser = webdriver.Chrome(chrome_options=chrome_options, executable_path='E:\\work_data\\soft src\\chromedriver_win32_76.0.3809.68\\chromedriver.exe')
 
-        self.start_urls.append('https://shopee.com.my/sinewing.my')
+        self.start_urls.append('https://shopee.com.my/swshoeswholesaler')
 
         self.crawlid = int(time.time())
 
-        self.curPage = 0
+        self.curPage = -1
         
 
     def closed(self,reason):
-        self.browser.close()        # 记得关闭
+        # self.browser.close()        # 记得关闭
+        pass
 
     def parse(self, response):
         # name = scrapy.Field()
@@ -62,14 +73,54 @@ class BuckSpider(scrapy.Spider):
         item['rating'] = rating
         item['crawlid'] = self.crawlid
 
-        print('============res=============')
+        #print('============res=============')
         #print(item)
-        print('============end=============')
+        #print('============end=============')
 
         yield item
 
         productPage = response.css('.navbar-with-more-menu__item:nth-child(2)::attr("href")').extract()
-        yield scrapy.Request(url=productPage, callable=self.parse_detail)
+        
+        print('============666=============')
+        print(response.urljoin(productPage[0]))
+        self.cur_page = self.cur_page + 1
+        url = response.urljoin(productPage[0]) + "?page=" + str(self.cur_page)
+        
+        yield scrapy.Request(url=url, callback=self.productList)
 
-    def parse_detail(self, response):
-        i = scrapy.loader.Itemloader(item=spiderone.items.buckProductItem, response=response)
+    def productList(self, response):
+        # crawlid = scrapy.Field()
+        # pcode = scrapy.Field()
+        # cover = scrapy.Field()
+        # discount = scrapy.Field()
+        # activity = scrapy.Field()
+        # multipleOffer = scrapy.Field()
+        # title = scrapy.Field()
+        # price = scrapy.Field()
+        # likes = scrapy.Field()
+        # sales = scrapy.Field()
+        # categorys = scrapy.Field()
+        # popularRanking = scrapy.Field()
+        # url = scrapy.Field()
+        pboxList = response.css(".shop-search-result-view__item")
+        print("======== into pboxList ==========");
+
+        for pbox in pboxList:
+            pitem = buckProductItem()
+            pitem['crawlid'] = self.crawlid
+            url = response.urljoin(pbox.css('a::attr(href)').extract()[0])
+            pitem['pcode'] = url[url.rfind('.')+1:]
+            pitem['cover'] = scrapy.selector.Selector(text=pbox.extract()).xpath('//div/div/a/div/div/div/@style').re(".*\"(.*)\"")[0]
+            pitem['discount'] = pbox.css('.percent::text').extract()[0] if pbox.css('.percent::text').extract() else ""
+            pitem['activity'] = ''
+            pitem['multipleOffer'] = pbox.css('._2B9nvB::text').extract()[0] if pbox.css('._2B9nvB::text').extract() else (pbox.css('._3TvbSB').extract()[0] if pbox.css('._3TvbSB').extract() else "")
+            pitem['url'] = url;
+
+            yield pitem;
+
+
+        
+
+
+
+        

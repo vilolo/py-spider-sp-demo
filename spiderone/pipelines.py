@@ -7,6 +7,7 @@
 
 import json
 import pymysql
+from spiderone.items import buckProductItem, buckStoreItem
 
 class SpideronePipeline1(object):
 
@@ -45,21 +46,33 @@ class SpideronePipeline2(object):
 class BuckPipeline(object):
     def __init__(self):
         print("=============== into BuckPipeline =======================")
+        self.conn = pymysql.connect(host='198.35.45.87', user='test', password='123!@#QWEasd', database='sp', charset='utf8')
         pass
 
     def process_item(self, item, spider):
-        conn = pymysql.connect(host='198.35.45.87', user='test', password='123!@#QWEasd', database='sp', charset='utf8')
-        cursor = conn.cursor()
-
+        
         try:
-            with conn.cursor() as cursor:
-                sql = 'insert into sp_store_detail_log (crawlid, name, store_id, products, joined, followers, following, rating) values(%s, %s, %s, %s, %s, %s, %s)'
+            if isinstance(item, buckStoreItem):
+                self.storeItem(item, spider)
+            if isinstance(item, buckProductItem):
+                self.productItem(item, spider)
+        finally:
+            # 关闭数据库连接
+            # self.conn.close()
+            pass
+        
+    def close_spider(self,spider):
+        self.conn.close()
+
+    def storeItem(self, item, spider):
+        with self.conn.cursor() as cursor:
+                sql = 'insert into sp_store_detail_log (crawlid, name, store_id, products, joined, followers, following, rating) values(%s, %s, %s, %s, %s, %s, %s, %s)'
 
                 # 执行SQL语句
                 cursor.execute(sql, (item['crawlid'], item['name'], item['storeId'], item['products'], item['joined'], item['followers'], item['following'], item['rating']))
             
                 # 连接完数据库并不会自动提交，所以需要手动 commit 你的改动
-                conn.commit()
+                self.conn.commit()
 
             # with conn.cursor() as cursor:
             #     # 读取单条记录
@@ -68,7 +81,13 @@ class BuckPipeline(object):
             #     result = cursor.fetchone()
 
             #     print(result)
-        
-        finally:
-            # 关闭数据库连接
-            conn.close()
+
+    def productItem(self, item, spider):
+        with self.conn.cursor() as cursor:
+            sql = 'insert into sp_product_log (crawlid, pcode, cover) values(%s, %s, %s)'
+
+            # 执行SQL语句
+            cursor.execute(sql, (item['crawlid'], item['pcode'], item['cover']))
+
+            # 连接完数据库并不会自动提交，所以需要手动 commit 你的改动
+            self.conn.commit()

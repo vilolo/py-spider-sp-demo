@@ -20,6 +20,11 @@ class DemoSpider(scrapy.Spider):
     }
 
     def parse(self, response):
+
+        str = "asdf.asdf.1.2"
+        print(str[str.rfind('.'):])
+        return
+
         # 使用功能类 itemLoader,以取代 看起来杂乱的 extract() 和 xpath() ，优化如下
         i = ItemLoader(item=items.SpideroneItem(), response=response)
         # author 作者

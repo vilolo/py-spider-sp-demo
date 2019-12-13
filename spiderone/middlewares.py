@@ -10,7 +10,8 @@ from scrapy import signals
 from scrapy.http import HtmlResponse
 from selenium import webdriver
 import time
-
+from scrapy.utils.response import response_status_message
+from scrapy.downloadermiddlewares.retry import RetryMiddleware
 
 class SpideroneSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
@@ -107,7 +108,7 @@ class SpideroneDownloaderMiddleware(object):
         spider.logger.info('Spider opened: %s' % spider.name)
 
 
-class SeleniumMiddleware(object):
+class SeleniumMiddleware(RetryMiddleware):
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the downloader middleware does not modify the
     # passed objects.
@@ -139,12 +140,13 @@ class SeleniumMiddleware(object):
         js = 'var langBtn = document.getElementsByClassName("shopee-button-outline--primary-reverse"); if(langBtn.length > 0){langBtn[0].click();};'
         spider.browser.execute_script(js); 
 
-        spider.browser.execute_script('setTimeout(window.scrollTo(0, 500), 1000)')
-        spider.browser.execute_script("window.scrollTo(500, 700);")
-        #spider.browser.execute_script("alert('123');")
+        # spider.browser.execute_script('setTimeout(window.scrollTo(0, 500), 1000)')
+        # spider.browser.execute_script("window.scrollTo(500, 700);")
+        # spider.browser.execute_script("alert('123');")
         spider.browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(5)
 
-        time.sleep(6)
+        spider.browser.page_source
         
 
         res = HtmlResponse(url = spider.browser.current_url, body = spider.browser.page_source, encoding = 'utf8', request = request)
@@ -160,6 +162,24 @@ class SeleniumMiddleware(object):
         # - return a Response object
         # - return a Request object
         # - or raise IgnoreRequest
+
+        print("$$$$$$$$$$$$$$$$$$$$")
+        print(len(response.xpath('//div/div/a/div/div/div/@style')))
+        print(len(response.css('.shop-search-result-view__item')))
+
+        if len(response.xpath('//div/div/a/div/div/div/@style')) != len(response.css('.shop-search-result-view__item')):
+            spider.browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            spider.browser.execute_script("window.scrollTo(100, 500);")
+            spider.browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+            time.sleep(10)
+            print("$$$$$$$$$$$$$$$$$$$$")
+            print(len(response.xpath('//div/div/a/div/div/div/@style')))
+            print(len(response.css('.shop-search-result-view__item')))
+
+            # reason = response_status_message(response.status)
+            if self._retry(request, response, spider) == True:
+                print("asdfasdf")
+
         return response
 
     def process_exception(self, request, exception, spider):

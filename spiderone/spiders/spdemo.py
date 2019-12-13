@@ -3,7 +3,6 @@ import scrapy
 import spiderone
 from selenium import webdriver
 
-
 class SpdemoSpider(scrapy.Spider):
     name = 'spdemo'
     allowed_domains = ['shopee.com.my']

@@ -90,3 +90,6 @@ DOWNLOAD_DELAY = 10
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 FEED_EXPORT_ENCODING = 'UTF-8'
+
+RETRY_ENABLED = True
+RETRY_TIMES = 5
